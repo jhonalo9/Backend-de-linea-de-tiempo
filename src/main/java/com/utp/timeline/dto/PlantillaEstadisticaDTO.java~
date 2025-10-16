@@ -1,0 +1,4 @@
+package com.utp.timeline.dto;
+
+public class PlantillaEstadisticaDTO {
+}
