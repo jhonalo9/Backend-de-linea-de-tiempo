@@ -93,15 +93,47 @@ public class PlantillaController {
     }
 
     // GET /api/plantillas/{id} - Obtener plantilla por ID
-    @GetMapping("/{id}")
+    /*@GetMapping("/{id}")
     public ResponseEntity<PlantillaResponseDTO> obtenerPlantilla(@PathVariable Long id) {
         try {
-            Usuario usuario = currentUserService.getCurrentUser();
-            Plantilla plantilla = plantillaService.obtenerPlantillaPorId(id, usuario);
+            //Usuario usuario = currentUserService.getCurrentUser();
+            Plantilla plantilla = plantillaService.obtenerPlantillaPorId(id, null);
             PlantillaResponseDTO plantillaDTO = plantillaMapper.toDto(plantilla);
             return ResponseEntity.ok(plantillaDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }*/
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PlantillaResponseDTO> obtenerPlantilla(@PathVariable Long id) {
+        try {
+            Usuario usuario = null;
+            try {
+                usuario = currentUserService.getCurrentUser();
+            } catch (Exception e) {
+
+            }
+
+            Plantilla plantilla = plantillaService.obtenerPlantillaPorId(id, usuario);
+            PlantillaResponseDTO plantillaDTO = plantillaMapper.toDto(plantilla);
+            return ResponseEntity.ok(plantillaDTO);
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @GetMapping("/categoria/{idCategoria}")
+    public ResponseEntity<List<PlantillaResponseDTO>> obtenerPlantillasPorCategoria(@PathVariable Integer idCategoria) {
+        try {
+            Usuario usuario = currentUserService.getCurrentUser();
+            List<Plantilla> plantillas = plantillaService.obtenerPlantillasPorCategoria(idCategoria, usuario);
+            List<PlantillaResponseDTO> plantillasDTO = plantillaMapper.toDtoList(plantillas);
+            return ResponseEntity.ok(plantillasDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).build();
         }
     }
 

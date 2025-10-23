@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,4 +42,20 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long> {
     // Verificar si un usuario es propietario del proyecto
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Proyecto p WHERE p.id = :proyectoId AND p.usuario.id = :usuarioId")
     boolean existsByIdAndUsuarioId(@Param("proyectoId") Long proyectoId, @Param("usuarioId") Long usuarioId);
+
+    // ✅ NUEVO: Contar TODOS los proyectos (para admin)
+    @Query("SELECT COUNT(p) FROM Proyecto p")
+    Long countAllProyectos();
+
+
+    // ✅ NUEVO: Contar proyectos creados en los últimos N días
+    @Query("SELECT COUNT(p) FROM Proyecto p WHERE p.fechaCreacion >= :fecha")
+    Long countProyectosDesde(@Param("fecha") LocalDateTime fecha);
+
+    // ✅ NUEVO: Promedio de proyectos por usuario
+    @Query("SELECT AVG(proyectosPorUsuario) FROM " +
+            "(SELECT COUNT(p) as proyectosPorUsuario FROM Proyecto p GROUP BY p.usuario.id)")
+    Double promedioProyectosPorUsuario();
+
+
 }

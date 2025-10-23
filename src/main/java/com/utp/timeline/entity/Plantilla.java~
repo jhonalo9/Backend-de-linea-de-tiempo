@@ -64,9 +64,6 @@ public class Plantilla {
     public Usuario getCreadoPor() { return creadoPor; }
     public void setCreadoPor(Usuario creadoPor) { this.creadoPor = creadoPor; }
 
-    public Categoria getCategoria() { return categoria; }
-    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
-
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 

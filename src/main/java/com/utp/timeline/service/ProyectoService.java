@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -131,5 +133,30 @@ public class ProyectoService {
         proyecto.setData(data);
         proyecto.setFechaModificacion(LocalDateTime.now());
         proyectoRepository.save(proyecto);
+    }
+
+
+    //  Estadísticas para administradores
+    public Map<String, Object> obtenerEstadisticasAdmin() {
+        Long totalProyectos = proyectoRepository.count(); // Usando el método de JpaRepository
+
+        LocalDateTime hace30Dias = LocalDateTime.now().minusDays(30);
+        Long proyectosRecientes = proyectoRepository.countProyectosDesde(hace30Dias);
+
+        Double promedioPorUsuario = proyectoRepository.promedioProyectosPorUsuario();
+        if (promedioPorUsuario == null) {
+            promedioPorUsuario = 0.0;
+        }
+
+        // Calcular crecimiento (proyectos últimos 30 días)
+        Long crecimiento = proyectosRecientes;
+
+        Map<String, Object> estadisticas = new HashMap<>();
+        estadisticas.put("totalProyectos", totalProyectos);
+        estadisticas.put("proyectosRecientes", proyectosRecientes);
+        estadisticas.put("proyectosPorUsuario", Math.round(promedioPorUsuario * 10.0) / 10.0);
+        estadisticas.put("crecimientoProyectos", crecimiento);
+
+        return estadisticas;
     }
 }

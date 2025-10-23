@@ -8,13 +8,14 @@ public class PlantillaEstadisticaDTO {
     private String creadoPorNombre;
     private Long conteo;
     private String tipoEstadistica;
-
+    private Integer categoriaId;        // Nuevo campo
+    private String categoriaNombre;
     // Constructores, getters y setters
     public PlantillaEstadisticaDTO() {}
 
     public PlantillaEstadisticaDTO(Long id, String nombre, String descripcion,
                                    Long creadoPorId, String creadoPorNombre,
-                                   Long conteo, String tipoEstadistica) {
+                                   Long conteo, String tipoEstadistica, Integer categoriaId, String categoriaNombre) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -22,6 +23,8 @@ public class PlantillaEstadisticaDTO {
         this.creadoPorNombre = creadoPorNombre;
         this.conteo = conteo;
         this.tipoEstadistica = tipoEstadistica;
+        this.categoriaId = categoriaId;
+        this.categoriaNombre = categoriaNombre;
     }
 
     // Getters y Setters
@@ -45,4 +48,10 @@ public class PlantillaEstadisticaDTO {
 
     public String getTipoEstadistica() { return tipoEstadistica; }
     public void setTipoEstadistica(String tipoEstadistica) { this.tipoEstadistica = tipoEstadistica; }
+
+    public Integer getCategoriaId() { return categoriaId; }
+    public void setCategoriaId(Integer categoriaId) { this.categoriaId = categoriaId; }
+
+    public String getCategoriaNombre() { return categoriaNombre; }
+    public void setCategoriaNombre(String categoriaNombre) { this.categoriaNombre = categoriaNombre; }
 }

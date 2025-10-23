@@ -26,6 +26,12 @@ public class PlantillaMapper {
             dto.setCreadoPorNombre(plantilla.getCreadoPor().getNombre());
         }
 
+        // Información de la categoría - AGREGAR ESTO
+        if (plantilla.getCategoria() != null) {
+            dto.setCategoriaId(plantilla.getCategoria().getIdCategoria());
+            dto.setCategoriaNombre(plantilla.getCategoria().getNombre());
+        }
+
         return dto;
     }
 
@@ -48,6 +54,12 @@ public class PlantillaMapper {
         if (plantilla.getCreadoPor() != null) {
             dto.setCreadoPorId(plantilla.getCreadoPor().getId());
             dto.setCreadoPorNombre(plantilla.getCreadoPor().getNombre());
+        }
+
+        // Información de la categoría para estadísticas - AGREGAR ESTO
+        if (plantilla.getCategoria() != null) {
+            dto.setCategoriaId(plantilla.getCategoria().getIdCategoria());
+            dto.setCategoriaNombre(plantilla.getCategoria().getNombre());
         }
 
         return dto;

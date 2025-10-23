@@ -11,6 +11,8 @@ public class PlantillaResponseDTO {
     private Boolean esPublica;
     private Long creadoPorId;
     private String creadoPorNombre;
+    private Integer categoriaId;        // Nuevo campo
+    private String categoriaNombre;
     private LocalDateTime fechaCreacion;
 
     // Constructores, getters y setters
@@ -43,4 +45,11 @@ public class PlantillaResponseDTO {
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+    public Integer getCategoriaId() { return categoriaId; }
+    public void setCategoriaId(Integer categoriaId) { this.categoriaId = categoriaId; }
+
+    public String getCategoriaNombre() { return categoriaNombre; }
+    public void setCategoriaNombre(String categoriaNombre) { this.categoriaNombre = categoriaNombre; }
+
 }

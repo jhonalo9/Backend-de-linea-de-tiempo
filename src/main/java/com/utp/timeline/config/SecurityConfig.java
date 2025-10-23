@@ -66,6 +66,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/publico/validar/**").permitAll()
                         .requestMatchers("/api/plantillas/publicas").permitAll()
                         .requestMatchers("/api/archivos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/plantillas/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/plantillas/populares").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categorias").permitAll()
+
+
+
 
                         // Endpoints de administración - solo ADMIN
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
@@ -73,8 +79,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/favoritos/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/publico/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/estadisticas/**").hasAuthority("ROLE_ADMIN")
+                        //.requestMatchers(HttpMethod.POST, "/api/categorias/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/categorias/**").hasAuthority("ROLE_ADMIN")
 
                         // Endpoints que requieren ser PREMIUM o ADMIN
+
                         .requestMatchers(HttpMethod.POST, "/api/plantillas").hasAnyAuthority("PREMIUM", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/plantillas/*").hasAnyAuthority("PREMIUM", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/plantillas/*").hasAnyAuthority("PREMIUM", "ROLE_ADMIN")
@@ -83,13 +92,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/plantillas/mis-plantillas").hasAnyAuthority("PREMIUM", "ROLE_ADMIN")
 
                         // Endpoints de lectura para todos autenticados
-                       // .requestMatchers(HttpMethod.GET, "/api/plantillas").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/plantillas/*").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/plantillas/populares").authenticated()
+
+                        //.requestMatchers(HttpMethod.GET, "/api/plantillas/*").authenticated()
+                        //.requestMatchers(HttpMethod.GET, "/api/plantillas/populares").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/plantillas/mas-usadas").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/plantillas/recientes").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/plantillas/buscar").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/plantillas/*/permisos").authenticated()
+
 
                         // Otros endpoints
                         .requestMatchers("/api/proyectos/**").authenticated()

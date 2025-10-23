@@ -5,7 +5,7 @@ public class PlantillaDTO {
     private String descripcion;
     private String data;
     private Boolean esPublica;
-
+    private Integer categoriaId;
     // Constructores
     public PlantillaDTO() {}
 
@@ -21,4 +21,6 @@ public class PlantillaDTO {
 
     public Boolean getEsPublica() { return esPublica; }
     public void setEsPublica(Boolean esPublica) { this.esPublica = esPublica; }
+    public Integer getCategoriaId() { return categoriaId; }
+    public void setCategoriaId(Integer categoriaId) { this.categoriaId = categoriaId; }
 }

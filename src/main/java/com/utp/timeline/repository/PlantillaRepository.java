@@ -1,5 +1,6 @@
 package com.utp.timeline.repository;
 
+import com.utp.timeline.entity.Categoria;
 import com.utp.timeline.entity.Plantilla;
 import com.utp.timeline.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -106,6 +107,13 @@ public interface PlantillaRepository extends JpaRepository<Plantilla, Long> {
     // Para plantillas más usadas
     @Query("SELECT p, COUNT(proy) as conteo FROM Plantilla p LEFT JOIN Proyecto proy ON p.id = proy.plantillaBase.id GROUP BY p ORDER BY conteo DESC")
     List<Object[]> findPlantillasMasUsadas();
+
+
+    List<Plantilla> findByCategoriaAndEstado(Categoria categoria, String estado);
+
+    // Buscar plantillas sin categoría
+    List<Plantilla> findByCategoriaIsNullAndEstado(String estado);
+
 
     Long countByEsPublicaTrue();
     Long countByEsPublicaFalse();

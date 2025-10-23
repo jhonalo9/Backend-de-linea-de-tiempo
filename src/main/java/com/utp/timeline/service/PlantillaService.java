@@ -2,6 +2,7 @@ package com.utp.timeline.service;
 
 import com.utp.timeline.dto.PlantillaEstadisticaDTO;
 import com.utp.timeline.dto.PlantillaMapper;
+import com.utp.timeline.entity.Categoria;
 import com.utp.timeline.entity.Plantilla;
 import com.utp.timeline.entity.Usuario;
 import com.utp.timeline.repository.PlantillaRepository;
@@ -20,9 +21,11 @@ public class PlantillaService {
 
     private final PlantillaRepository plantillaRepository;
     private final PlantillaMapper plantillaMapper;
+    private final CategoriaService categoriaService;
 
     @Autowired
-    public PlantillaService(PlantillaRepository plantillaRepository,PlantillaMapper plantillaMapper) {
+    public PlantillaService(PlantillaRepository plantillaRepository,PlantillaMapper plantillaMapper, CategoriaService categoriaService) {
+        this.categoriaService = categoriaService;
         this.plantillaRepository = plantillaRepository;
         this.plantillaMapper = plantillaMapper;
     }
@@ -39,9 +42,25 @@ public class PlantillaService {
             throw new RuntimeException("Ya tienes una plantilla con ese nombre");
         }
 
+        // Validar categoría si se proporciona
+        if (plantilla.getCategoria() != null && plantilla.getCategoria().getIdCategoria() != null) {
+            Categoria categoria = categoriaService.obtenerCategoriaPorId(plantilla.getCategoria().getIdCategoria());
+
+            // Verificar que la categoría esté activa
+            if (!"ACTIVA".equals(categoria.getEstado())) {
+                throw new RuntimeException("La categoría seleccionada no está disponible");
+            }
+
+            plantilla.setCategoria(categoria);
+        } else {
+            // Si no se proporciona categoría, establecer como null
+            plantilla.setCategoria(null);
+        }
+
         plantilla.setCreadoPor(creador);
         plantilla.setFechaCreacion(LocalDateTime.now());
         plantilla.setEstado("ACTIVA");
+
 
         // Por defecto, las plantillas de admin son públicas, las de usuarios privadas
         if (creador.getRol() == Usuario.Rol.ADMIN) {
@@ -49,6 +68,8 @@ public class PlantillaService {
         } else {
             plantilla.setEsPublica(plantilla.getEsPublica() != null ? plantilla.getEsPublica() : false);
         }
+
+
 
         return plantillaRepository.save(plantilla);
     }
@@ -68,13 +89,36 @@ public class PlantillaService {
     }
 
     // Obtener plantilla por ID con verificación de permisos
-    public Plantilla obtenerPlantillaPorId(Long id, Usuario usuario) {
+    /*public Plantilla obtenerPlantillaPorId(Long id, Usuario usuario) {
         Plantilla plantilla = plantillaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Plantilla no encontrada"));
 
         // Verificar permisos de acceso
         if (!tieneAccesoAPlantilla(plantilla, usuario)) {
             throw new RuntimeException("No tienes permisos para acceder a esta plantilla");
+        }
+
+        return plantilla;
+    }*/
+
+    public Plantilla obtenerPlantillaPorId(Long id, Usuario usuario) {
+        Plantilla plantilla = plantillaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plantilla no encontrada"));
+
+        // ✅ SOLO PERMITIR PLANTILLAS PÚBLICAS PARA USUARIOS NO AUTENTICADOS
+        if (!plantilla.getEsPublica() || !"ACTIVA".equals(plantilla.getEstado())) {
+            // Si no es pública, verificar que hay usuario autenticado
+            if (usuario == null) {
+                throw new RuntimeException("Plantilla no disponible");
+            }
+
+            // Verificar permisos del usuario autenticado
+            boolean puedeAcceder = plantilla.getCreadoPor().getId().equals(usuario.getId()) ||
+                    usuario.getRol() == Usuario.Rol.ADMIN;
+
+            if (!puedeAcceder) {
+                throw new RuntimeException("No tienes permisos para acceder a esta plantilla");
+            }
         }
 
         return plantilla;
@@ -107,6 +151,25 @@ public class PlantillaService {
 
         if (plantillaActualizada.getData() != null) {
             plantillaExistente.setData(plantillaActualizada.getData());
+        }
+
+        // Actualizar categoría si se proporciona
+        if (plantillaActualizada.getCategoria() != null) {
+            if (plantillaActualizada.getCategoria().getIdCategoria() != null) {
+                Categoria categoria = categoriaService.obtenerCategoriaPorId(
+                        plantillaActualizada.getCategoria().getIdCategoria()
+                );
+
+                // Verificar que la categoría esté activa
+                if (!"ACTIVA".equals(categoria.getEstado())) {
+                    throw new RuntimeException("La categoría seleccionada no está disponible");
+                }
+
+                plantillaExistente.setCategoria(categoria);
+            } else {
+                // Si se envía una categoría sin ID, establecer como null
+                plantillaExistente.setCategoria(null);
+            }
         }
 
         // Solo premium y admin pueden cambiar visibilidad
@@ -328,10 +391,19 @@ public class PlantillaService {
         return plantillaRepository.findAll();
     }
 
-    // Método adicional para buscar por nombre y creador
-    /*private Optional<Plantilla> findByNombreAndCreadoPor(String nombre, Usuario creadoPor) {
-        return plantillaRepository.findByCreadoPor(creadoPor).stream()
-                .filter(p -> p.getNombre().equalsIgnoreCase(nombre))
-                .findFirst();
-    }*/
+    // Obtener plantillas por categoría
+    public List<Plantilla> obtenerPlantillasPorCategoria(Integer idCategoria, Usuario usuario) {
+        try {
+            Categoria categoria = categoriaService.obtenerCategoriaPorId(idCategoria);
+            List<Plantilla> plantillas = plantillaRepository.findByCategoriaAndEstado(categoria, "ACTIVA");
+
+            // Filtrar según permisos del usuario
+            return plantillas.stream()
+                    .filter(plantilla -> tieneAccesoAPlantilla(plantilla, usuario))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 }

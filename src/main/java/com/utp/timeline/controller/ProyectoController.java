@@ -163,6 +163,16 @@ public class ProyectoController {
         }
     }
 
+    @GetMapping("/admin/estadisticas")
+    public ResponseEntity<?> obtenerEstadisticasAdmin() {
+        try {
+            Map<String, Object> estadisticas = proyectoService.obtenerEstadisticasAdmin();
+            return ResponseEntity.ok(estadisticas);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener estadísticas: " + e.getMessage());
+        }
+    }
+
     // GET /api/proyectos/estadisticas - Estadísticas del usuario
     @GetMapping("/estadisticas")
     public ResponseEntity<?> obtenerEstadisticas() {
