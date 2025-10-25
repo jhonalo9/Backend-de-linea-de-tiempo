@@ -76,21 +76,60 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<Map<String, Object>> loginGoogle(@RequestBody GoogleLoginRequest googleRequest) {
         try {
-            // Validar token con Google
-            GoogleAuthService.GoogleUserInfo googleUserInfo = googleAuthService.verifyToken(googleRequest.getToken());
+            if (googleRequest.getCode() == null || googleRequest.getCode().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", "Código de autorización requerido",
+                        "message", "El código de Google no puede estar vacío"
+                ));
+            }
+            // Intercambiar el código de autorización por tokens de Google);
+            Map<String, String> tokens;
+            try {
+                tokens = googleAuthService.exchangeCodeForTokens(googleRequest.getCode());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", "Error al intercambiar código por tokens",
+                        "message", e.getMessage()
+                ));
+            }
+            String accessToken = tokens.get("access_token");
+            String idToken = tokens.get("id_token");
+
+            GoogleAuthService.GoogleUserInfo googleUserInfo;
+            try {
+                googleUserInfo = googleAuthService.verifyToken(idToken);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", "Error al verificar token de Google",
+                        "message", e.getMessage()
+                ));
+            }
 
             if (!googleUserInfo.isEmailVerified()) {
-                throw new RuntimeException("Email de Google no verificado");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", "Email no verificado",
+                        "message", "El email de Google no está verificado"
+                ));
             }
 
             // Registrar o autenticar usuario con Google
-            Usuario usuario = usuarioService.registrarConGoogle(
-                    googleUserInfo.getSub(),
-                    googleUserInfo.getEmail(),
-                    googleUserInfo.getName()
-            );
+            Usuario usuario;
+            try {
+                usuario = usuarioService.registrarConGoogle(
+                        googleUserInfo.getSub(),
+                        googleUserInfo.getEmail(),
+                        googleUserInfo.getName()
 
-            // Generar token JWT para nuestra app
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", "Error al registrar usuario",
+                        "message", e.getMessage()
+                ));
+            }
+
             UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getEmail());
             String token = jwtService.generateToken(userDetails);
 
@@ -110,6 +149,7 @@ public class AuthController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of(
                     "error", "Error en autenticación con Google",
                     "message", e.getMessage()
@@ -276,11 +316,11 @@ public class AuthController {
     }
 
     public static class GoogleLoginRequest {
-        private String token;
+        private String code;
 
-        // Getters y Setters
-        public String getToken() { return token; }
-        public void setToken(String token) { this.token = token; }
+        // CORREGIDO: Los getters/setters deben coincidir con el nombre del campo
+        public String getCode() { return code; }
+        public void setCode(String code) { this.code = code; }
     }
 
     // Clase para representar la información del usuario de Google
