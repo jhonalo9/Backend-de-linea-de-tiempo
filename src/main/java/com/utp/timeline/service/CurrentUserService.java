@@ -1,12 +1,13 @@
 package com.utp.timeline.service;
 
-import com.utp.timeline.entity.Usuario;
-import com.utp.timeline.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import com.utp.timeline.entity.Usuario;
+import com.utp.timeline.repository.UsuarioRepository;
 
 @Service
 public class CurrentUserService {

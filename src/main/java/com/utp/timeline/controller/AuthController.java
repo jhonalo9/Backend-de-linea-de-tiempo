@@ -1,20 +1,28 @@
 package com.utp.timeline.controller;
 
-import com.utp.timeline.config.JwtService;
-import com.utp.timeline.entity.Usuario;
-import com.utp.timeline.service.CustomUserDetailsService;
-import com.utp.timeline.service.GoogleAuthService;
-import com.utp.timeline.service.UsuarioService;
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.utp.timeline.config.JwtService;
+import com.utp.timeline.config_seguridad.RateLimited;
+import com.utp.timeline.entity.Usuario;
+import com.utp.timeline.service.CustomUserDetailsService;
+import com.utp.timeline.service.GoogleAuthService;
+import com.utp.timeline.service.UsuarioService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -38,6 +46,13 @@ public class AuthController {
 
     // Login tradicional
     @PostMapping("/login")
+    @RateLimited(
+        maxRequests = 5,
+        duration = 1,
+        unit = TimeUnit.MINUTES,
+        type = RateLimited.LimitType.IP,
+        message = "Demasiados intentos"
+    )
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         // Autenticar usuario
         authenticationManager.authenticate(
@@ -74,6 +89,13 @@ public class AuthController {
 
     // Login con Google
     @PostMapping("/google")
+     @RateLimited(
+        maxRequests = 3,
+        duration = 1,
+        unit = TimeUnit.MINUTES,
+        type = RateLimited.LimitType.IP,
+        message = "Demasiados intentos de login con Google"
+    )
     public ResponseEntity<Map<String, Object>> loginGoogle(@RequestBody GoogleLoginRequest googleRequest) {
         try {
             if (googleRequest.getCode() == null || googleRequest.getCode().trim().isEmpty()) {
